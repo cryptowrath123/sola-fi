@@ -3,14 +3,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { supabaseAuth } from "../../services/supabaseAuth";
 
@@ -29,8 +29,8 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const { session, error } = await supabaseAuth.loginWithEmail(email, password);
-      if (error) throw error;
+      const result = await supabaseAuth.loginWithEmail(email, password);
+      if (!result.session) throw new Error('Login failed');
       router.replace("/(dashboard)" as any);
     } catch (error: any) {
       Alert.alert("Login failed", error.message);

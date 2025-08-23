@@ -3,14 +3,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { supabaseAuth } from "../../services/supabaseAuth";
 
@@ -27,8 +27,8 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     try {
-      const { success, error } = await supabaseAuth.resetPassword(email);
-      if (error) throw error;
+      const result = await supabaseAuth.resetPassword(email);
+      if (!result.success) throw new Error('Failed to send reset email');
       Alert.alert(
         "Check your email",
         "A password reset link has been sent to your email address."

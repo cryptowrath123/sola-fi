@@ -3,14 +3,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { supabaseAuth } from "../../services/supabaseAuth";
 
@@ -35,8 +35,8 @@ export default function SignupScreen() {
 
     setLoading(true);
     try {
-      const { user, error } = await supabaseAuth.registerWithEmail(email, password);
-      if (error) throw error;
+      const result = await supabaseAuth.registerWithEmail(email, password);
+      if (!result.user) throw new Error('Registration failed');
       Alert.alert("Success", "Account created successfully! Please log in.");
       router.push("/auth/login");
     } catch (error: any) {
