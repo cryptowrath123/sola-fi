@@ -1,19 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { auth } from "../../lib/firebase";
+import { supabaseAuth } from "../../services/supabaseAuth";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -30,7 +29,8 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { session, error } = await supabaseAuth.loginWithEmail(email, password);
+      if (error) throw error;
       router.replace("/(dashboard)" as any);
     } catch (error: any) {
       Alert.alert("Login failed", error.message);

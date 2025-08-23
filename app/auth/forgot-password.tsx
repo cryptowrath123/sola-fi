@@ -1,19 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { sendPasswordResetEmail } from "firebase/auth";
 import React, { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { auth } from "../../lib/firebase";
+import { supabaseAuth } from "../../services/supabaseAuth";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -28,7 +27,8 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     try {
-      await sendPasswordResetEmail(auth, email);
+      const { success, error } = await supabaseAuth.resetPassword(email);
+      if (error) throw error;
       Alert.alert(
         "Check your email",
         "A password reset link has been sent to your email address."

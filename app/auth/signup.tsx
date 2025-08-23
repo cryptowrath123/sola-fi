@@ -1,19 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { auth } from "../../lib/firebase";
+import { supabaseAuth } from "../../services/supabaseAuth";
 
 export default function SignupScreen() {
   const [email, setEmail] = useState("");
@@ -36,7 +35,8 @@ export default function SignupScreen() {
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const { user, error } = await supabaseAuth.registerWithEmail(email, password);
+      if (error) throw error;
       Alert.alert("Success", "Account created successfully! Please log in.");
       router.push("/auth/login");
     } catch (error: any) {

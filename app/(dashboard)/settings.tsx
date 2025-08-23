@@ -1,17 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import {
-  Alert,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { auth } from "../../lib/firebase";
+import { supabaseAuth } from "../../services/supabaseAuth";
 import { useAuth } from "../context/AuthContext";
 
 export default function SettingsScreen() {
@@ -27,7 +26,7 @@ export default function SettingsScreen() {
   const confirmSignOut = async () => {
     setLoading(true);
     try {
-      await signOut(auth);
+      await supabaseAuth.logout();
       setShowSignOutModal(false);
       router.replace("/auth/login");
     } catch (error) {

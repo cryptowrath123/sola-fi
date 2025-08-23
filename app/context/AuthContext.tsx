@@ -1,16 +1,21 @@
-import { onAuthStateChanged, User } from "firebase/auth";
+import { User } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  createUserProfile,
-  getUserProfile,
-  updateUserProfile,
-} from "../../lib/database";
-import { auth } from "../../lib/firebase";
+import { supabaseAuth } from "../../services/supabaseAuth";
+import { supabase } from "../../services/supabaseClient";
+
+interface UserProfile {
+  id: string;
+  user_id: string;
+  wallet_address: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  userProfile: any | null;
+  userProfile: UserProfile | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,43 +30,53 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-
-      if (user) {
-        try {
-          // Check if user profile exists
-          let profile = await getUserProfile(user.uid);
-
-          if (!profile) {
-            // Create new user profile
-            await createUserProfile(user.uid, user.email || "");
-            profile = await getUserProfile(user.uid);
-          } else {
-            // Update last login time
-            await updateUserProfile(user.uid, {
-              lastLoginAt: new Date() as any,
-            });
+    // Function to load user and profile
+    const loadUserAndProfile = async () => {
+      try {
+        // Get current session
+        const session = await supabaseAuth.getCurrentSession();
+        
+        if (session) {
+          // Get current user
+          const currentUser = await supabaseAuth.getCurrentUser();
+          setUser(currentUser);
+          
+          if (currentUser) {
+            // Get user profile
+            const profile = await supabaseAuth.getUserProfile(currentUser.id);
+            setUserProfile(profile);
           }
+        }
+      } catch (error) {
+        console.error("Error loading user and profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadUserAndProfile();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user);
+          const profile = await supabaseAuth.getUserProfile(session.user.id);
           setUserProfile(profile);
-        } catch (error) {
-          console.error("Error managing user profile:", error);
-          // For now, set userProfile to null to prevent app crashes
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
           setUserProfile(null);
         }
-      } else {
-        setUserProfile(null);
       }
+    );
 
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
   const value = {
